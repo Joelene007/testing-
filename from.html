@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTML Form Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffe4ec;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        
+        form {
+            background-color: #ffb6c1;
+            padding: 50px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            display: inline-block;
+            margin-top: 50px;
+        }
+        
+        label {
+            font-weight: bold;
+            color: #880e4f;
+        }
+        
+        input, textarea, select {
+            width: 90%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #d81b60;
+            border-radius: 5px;
+        }
+        
+        input[type="submit"] {
+            background-color: #e91e63;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        input[type="submit"]:hover {
+            background-color: #c2185b;
+        }
+        
+        p {
+            color: #880e4f;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>HTML Form Example</h2>
+
+<form action="/action_page.php"> 
+    <label for="name">Name:</label><br> 
+    <input type="text" id="name" name="name" required><br>
+    
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" name="email" required><br>
+
+    <label for="message">Message:</label><br>
+    <textarea id="message" name="message" rows="4" cols="30" required></textarea><br>
+
+    <label for="gender">Gender:</label>
+    <select id="gender" name="gender">
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+    </select><br>
+
+    <input type="submit" value="Submit">
+</form> 
+
+<p>© 2025 HTML Form Example. All rights reserved.</p>
+
+</body>
+</html>

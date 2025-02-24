@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chronic Disease Health Tracking System</title>
+    <!-- นำเข้า Bootstrap CSS ผ่าน CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-10">
+                <h1>Chronic Disease Health Tracking System</h1>
+            </div>
+            <div class="col-2 text-end">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#from_Patient_Modal" onclick="click_momal_add()">เพิ่ม</button>
+            </div>
+        </div>
+
+        <!-- ตาราง -->
+        <table class="table table-striped table-hover" id="table_Patient_list">
+            <thead>
+                <tr>
+                    <th scope="col">PatientID</th>
+                    <th scope="col">PatientName</th>
+                    <th scope="col">PatientCode</th>
+                    <th scope="col">RecordDate</th>
+                    <th scope="col">BloodSugarLevel</th>
+                    <th scope="col">BloodPressure</th>
+                    <th scope="col">Cholesterol</th>
+                    <th scope="col">#</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="modal fade modal-lg" id="from_Patient_Modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="FormModalLabel">เพิ่มข้อมูลผู้ป่วย</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <input type="hidden" id="edit_type">
+                        <div class="form-floating mb-3" id="form_Patient_id">
+                            <input type="text" class="form-control" id="txt_Patient_id" readonly>
+                            <label for="txt_Patient_id">รหัสประจำตัว</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="form_name" required>
+                            <label for="form_name">ชื่อ</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="form_phone" required>
+                            <label for="form_phone">เบอร์โทร</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="get_Patient_api();">ปิด</button>
+                    <button type="button" class="btn btn-primary" onclick="save_Patient()">บันทึก</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- นำเข้า Bootstrap Bundle ที่รวม Popper.js ไว้ด้วย -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function get_Patient_api() {
+            fetch('http://127.0.0.1:3000/getPatients')
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);  // เพิ่มบรรทัดนี้เพื่อตรวจสอบข้อมูลที่ได้รับ
+                    let tableRef = document.querySelector("#table_Patient_list tbody");
+                    tableRef.innerHTML = "";
+                    data.forEach(element => {
+                        let row = document.createElement("tr");
+                        row.innerHTML = ` 
+                            <td>${element.PatientID}</td>
+                            <td>${element.PatientName}</td>
+                            <td>${element.PatientCode}</td>
+                            <td>${element.RecordDate}</td>
+                            <td>${element.BloodSugarLevel}</td>
+                            <td>${element.BloodPressure}</td>
+                            <td>${element.Cholesterol}</td>
+                            <td>
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#from_Patient_Modal" onclick="click_momal_edit(${element.PatientID})">แก้ไข</button>
+                                <button type="button" class="btn btn-danger" onclick="delete_Patient(${element.PatientID})">ลบ</button>
+                            </td>
+                        `;
+                        tableRef.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+        
+
+        function click_momal_add() {
+            document.getElementById('FormModalLabel').innerHTML = "เพิ่มข้อมูลผู้ป่วย";
+            document.getElementById('edit_type').value = "new";
+            document.getElementById('form_Patient_id').style.display = "none";
+            document.getElementById('txt_Patient_id').value = "";
+            document.getElementById('form_name').value = "";
+            document.getElementById('form_phone').value = "";
+        }
+
+        function click_momal_edit(id) {
+            document.getElementById('FormModalLabel').innerHTML = "แก้ไขข้อมูลผู้ป่วย";
+            document.getElementById('edit_type').value = "edit";
+            fetch(`http://127.0.0.1:3000/getPatient/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('txt_Patient_id').value = data.PatientID;
+                    document.getElementById('form_name').value = data.PatientName;
+                    document.getElementById('form_phone').value = data.PatientCode;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function save_Patient() {
+            let edit_type_f = document.getElementById('edit_type').value;
+            let Patient_ID_f = document.getElementById('txt_Patient_id').value;
+            let Patient_Name_f = document.getElementById('form_name').value;
+            let Patient_Code_f = document.getElementById('form_phone').value;
+
+            if (Patient_Name_f.trim() == "" || Patient_Code_f.trim() == "") {
+                alert("กรุณากรอกข้อมูลให้ครบ");
+            } else {
+                const apiUrl = (edit_type_f == "new") ? 'http://localhost:3000/addPatient' : `http://localhost:3000/editPatient/${Patient_ID_f}`;
+                const data = {
+                    Patient_name: Patient_Name_f,
+                    Patient_phone: Patient_Code_f,
+                    status: '1'
+                };
+
+                const requestOptions = {
+                    method: edit_type_f == "new" ? 'POST' : 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                };
+
+                fetch(apiUrl, requestOptions)
+                    .then(response => response.json())
+                    .then(data => {
+                        alert("บันทึกข้อมูลเรียบร้อย");
+                        get_Patient_api();  // รีเฟรชตาราง
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+        }
+
+        function delete_Patient(id) {
+            if (confirm('คุณต้องการลบข้อมูลนี้?')) {
+                fetch(`http://localhost:3000/deletePatient/${id}`, {
+                    method: 'DELETE'
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert("ลบข้อมูลเรียบร้อย");
+                        get_Patient_api();  // รีเฟรชตาราง
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        }
+    </script>
+</body>
+
+</html>
